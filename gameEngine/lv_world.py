@@ -129,7 +129,7 @@ class lv_world:
 		while( self.gameDay <= 7 ):
 			os.system('clear')
 			self.processTime()
-			self.processGravity()
+			# self.processGravity()
 			print '\033[32mInfo\033[0m World     Game date: %i-%i-%i\tGame time: %i:%i:%i' % ( self.gameYear, self.gameMonth, self.gameDay, self.gameHour, self.gameMinute, self.gameSecond )
 			for character in self.characters:
 				print '\033[32mInfo\033[0m Character %i, %s' % ( character.id, character.gender )

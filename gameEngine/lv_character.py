@@ -21,6 +21,7 @@ class lv_character:
 		self.id = id
 		self.world = world
 		self.pos = [ 0, 0, 0 ]
+		self.destination = [ 0, 0, 0 ]
 		
 		if( gender.lower() == 'random' ):
 			self.gender = choice( ( 'male', 'female' ) )
@@ -37,10 +38,34 @@ class lv_character:
 						'hygiene':	1000,
 						'fun':		1000,
 						'social':	1000 }
-	
-	def move( self, x, y, z ):
+
+	def teleportTo( self, x, y, z ):
+		print 'DEBUG: Character %i teleports to X: %i Y: %i Z: %i.' % ( self.id, x, y, z )
 		self.pos = [ x, y, z ]
 		
+	def goTo( self, x, y, z ):
+		print 'DEBUG: Character %i goes to X: Y: %i %i Z: %i.' % ( self.id, x, y, z )
+		self.destination = [ x, y, z ]
+		
+	def move( self, x, y, z ):
+		if( self.pos[ 0 ] != self.destination[ 0 ] and self.pos[ 1 ] != self.destination[ 1 ] and self.pos[ 2 ] != self.destination[ 2 ] )
+			print 'DEBUG: Character %i is on his/her way.'
+			# X axis
+			if( self.pos[ 0 ] < self.destination[ 0 ] ):
+				self.pos[ 0 ] += 1
+			elif( self.pos[ 0 ] > self.destination[ 0 ] ):
+				self.pos[ 0 ] -= 1
+			# Y axis
+			if( self.pos[ 1 ] < self.destination [ 1 ] ):
+				self.pos[ 1 ] += 1
+			elif( self.pos[ 1 ] > self.destination[ 1 ] ):
+				self.pos[ 1 ] -= 1
+			# Z axis
+			if( self.pos[ 2 ] < self.destination [ 2 ] ):
+				self.pos[ 2 ] += 1
+			elif( self.pos[ 2 ] > self.destination[ 2 ] ):
+				self.pos[ 2 ] -= 1
+				
 	def isInRange( self, characterOrObject ):
 		if( characterOrObject.pos[ 0 ] >= self.pos[ 0 ] - 5 and characterOrObject.pos[0] <= self.pos[ 0 ] + 5 ):
 			if( characterOrObject.pos[ 1 ] >= self.pos[ 1 ] - 5 and characterOrObject.pos[ 1 ] <= self.pos[ 1 ] + 5 ):
