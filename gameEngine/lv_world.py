@@ -70,10 +70,10 @@ class lv_world:
 		for i in range(amountOfCharacters):
 			self.characters.insert( 0, lv_character( i, self, 'random' ) )
 
-		self.objects.insert( 0, lv_bed( 0, 1, 1, 0 ) )
+		self.objects.insert( 0, lv_bed( 0, -7, -7, 0 ) )
 		self.objects.insert( 1, lv_cooker( 1, 1, 1, 0 ) )
-		self.objects.insert( 2, lv_refrigerator( 2, 1, 1, 0 ) )
-		self.objects.insert( 3, lv_shower( 3, 1, 1, 0 ) )
+		self.objects.insert( 2, lv_refrigerator( 2, 5, 5, 0 ) )
+		self.objects.insert( 3, lv_shower( 3, 7, 3, 0 ) )
 		
 	def processTime( self ):
 		# Process the game time.
@@ -133,6 +133,7 @@ class lv_world:
 			print '\033[32mInfo\033[0m World     Game date: %i-%i-%i\tGame time: %i:%i:%i' % ( self.gameYear, self.gameMonth, self.gameDay, self.gameHour, self.gameMinute, self.gameSecond )
 			for character in self.characters:
 				print '\033[32mInfo\033[0m Character %i, %s' % ( character.id, character.gender )
+				print 'Pos:\t%i %i %i\tDestination: %i %i %i' % ( character.pos[0], character.pos[1], character.pos[2], character.destination[0], character.destination[1], character.destination[2] )
 				print '\033[32mInfo\033[0m           Sleep: %i\tFood: %i\tWater: %i' % ( character.needs['sleep'], character.needs['food'], character.needs['water'] )
 				print '\033[32mInfo\033[0m           Hygiene: %i\tFun: %i\tSocial: %i' % ( character.needs['hygiene'], character.needs['fun'], character.needs['social'] )
 				print '\033[32mInfo\033[0m           Activity: %s (%i game seconds left)' % ( character.activity, character.activityTimer )

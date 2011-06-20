@@ -18,26 +18,33 @@ from random import choice
 
 class lv_character:
 	def __init__( self, id, world, gender ):
-		self.id = id
-		self.world = world
-		self.pos = [ 0, 0, 0 ]
-		self.destination = [ 0, 0, 0 ]
+		self.id = id																# Unique integer number to identify a character.
+		self.world = world															# The world a character belongs to.
+		self.pos = [ 0, 0, 0 ]														# A characters current position.
+		self.destination = [ 0, 0, 0 ]												# A characters destination for movement.
 		
-		if( gender.lower() == 'random' ):
-			self.gender = choice( ( 'male', 'female' ) )
-		else:
-			self.gender = gender
+		if( gender.lower() == 'random' ):											# A characters gender.
+			self.gender = choice( ( 'male', 'female' ) )							#
+		else:																		#
+			self.gender = gender													#
 		
-		self.activity = None
-		self.activityTimer = 0
-		self.activityInteractive = None
+		self.activity = None														# A characters activity.
+		self.activityTimer = 0														# How much game seconds are left for an activity.
+		self.activityInteractive = None												# The character or object to interact with.
 		
-		self.needs = {	'sleep':	1000,
-						'food':		1000,
-						'water':	1000,
-						'hygiene':	1000,
-						'fun':		1000,
-						'social':	1000 }
+		self.activityRadiusOn = 0													# The radius for activities which the character is
+																					# on a character or object.
+		self.activityRadiusNextTo = 1												# The radius for activities which the character is
+																					# next to a character or object.
+		self.activityRadiusNear = 2													# The radius for activities which the character is
+																					# near the character or object.
+		
+		self.needs = {	'sleep':	1000,											# The chracters needs.
+						'food':		1000,											#
+						'water':	1000,											#
+						'hygiene':	1000,											#
+						'fun':		1000,											#
+						'social':	1000 }											#
 
 	def teleportTo( self, x, y, z ):
 		print 'DEBUG: Character %i teleports to X: %i Y: %i Z: %i.' % ( self.id, x, y, z )
@@ -47,36 +54,63 @@ class lv_character:
 		print 'DEBUG: Character %i goes to X: Y: %i %i Z: %i.' % ( self.id, x, y, z )
 		self.destination = [ x, y, z ]
 		
-	def move( self, x, y, z ):
-		if( self.pos[ 0 ] != self.destination[ 0 ] and self.pos[ 1 ] != self.destination[ 1 ] and self.pos[ 2 ] != self.destination[ 2 ] )
-			print 'DEBUG: Character %i is on his/her way.'
-			# X axis
+	def move( self ):
+		# X axis
+		if( self.pos[ 0 ] != self.destination[ 0 ] ):
+			print 'DEBUG: Character %i is on his/her way on the x axis.'
 			if( self.pos[ 0 ] < self.destination[ 0 ] ):
 				self.pos[ 0 ] += 1
 			elif( self.pos[ 0 ] > self.destination[ 0 ] ):
 				self.pos[ 0 ] -= 1
-			# Y axis
+		# Y axis
+		if( self.pos[ 1 ] != self.destination[ 1 ] ):
+			print 'DEBUG: Character %i is on his/her way on the y axis.'
 			if( self.pos[ 1 ] < self.destination [ 1 ] ):
 				self.pos[ 1 ] += 1
 			elif( self.pos[ 1 ] > self.destination[ 1 ] ):
 				self.pos[ 1 ] -= 1
-			# Z axis
+		# Z axis
+		if( self.pos[ 2 ] != self.destination[ 2 ] ):
+			print 'DEBUG: Character %i is on his/her way on the z axis.'
 			if( self.pos[ 2 ] < self.destination [ 2 ] ):
 				self.pos[ 2 ] += 1
 			elif( self.pos[ 2 ] > self.destination[ 2 ] ):
 				self.pos[ 2 ] -= 1
 				
-	def isInRange( self, characterOrObject ):
-		if( characterOrObject.pos[ 0 ] >= self.pos[ 0 ] - 5 and characterOrObject.pos[0] <= self.pos[ 0 ] + 5 ):
-			if( characterOrObject.pos[ 1 ] >= self.pos[ 1 ] - 5 and characterOrObject.pos[ 1 ] <= self.pos[ 1 ] + 5 ):
-				if( characterOrObject.pos[ 2 ] >= self.pos[ 2 ] - 5 and characterOrObject.pos[ 2 ] <= self.pos[ 2 ] + 5 ):
-					return True
+	def isInRange( self, characterOrObject, type ):
+		if( type == 'On' ):
+			if( characterOrObject.pos[ 0 ] >= self.pos[ 0 ] - self.activityRadiusOn and characterOrObject.pos[0] <= self.pos[ 0 ] + self.activityRadiusOn ):
+				if( characterOrObject.pos[ 1 ] >= self.pos[ 1 ] - self.activityRadiusOn and characterOrObject.pos[ 1 ] <= self.pos[ 1 ] + self.activityRadiusOn ):
+					if( characterOrObject.pos[ 2 ] >= self.pos[ 2 ] - self.activityRadiusOn and characterOrObject.pos[ 2 ] <= self.pos[ 2 ] + self.activityRadiusOn ):
+						return True
+					else:
+						return False
 				else:
 					return False
 			else:
 				return False
-		else:
-			return False
+		if( type == 'NextTo' ):
+			if( characterOrObject.pos[ 0 ] >= self.pos[ 0 ] - self.activityRadiusNextTo and characterOrObject.pos[0] <= self.pos[ 0 ] + self.activityRadiusNextTo ):
+				if( characterOrObject.pos[ 1 ] >= self.pos[ 1 ] - self.activityRadiusNextTo and characterOrObject.pos[ 1 ] <= self.pos[ 1 ] + self.activityRadiusNextTo ):
+					if( characterOrObject.pos[ 2 ] >= self.pos[ 2 ] - self.activityRadiusNextTo and characterOrObject.pos[ 2 ] <= self.pos[ 2 ] + self.activityRadiusNextTo ):
+						return True
+					else:
+						return False
+				else:
+					return False
+			else:
+				return False
+		if( type == 'Near' ):
+			if( characterOrObject.pos[ 0 ] >= self.pos[ 0 ] - self.activityRadiusNear and characterOrObject.pos[0] <= self.pos[ 0 ] + self.activityRadiusNear ):
+				if( characterOrObject.pos[ 1 ] >= self.pos[ 1 ] - self.activityRadiusNear and characterOrObject.pos[ 1 ] <= self.pos[ 1 ] + self.activityRadiusNear ):
+					if( characterOrObject.pos[ 2 ] >= self.pos[ 2 ] - self.activityRadiusNear and characterOrObject.pos[ 2 ] <= self.pos[ 2 ] + self.activityRadiusNear ):
+						return True
+					else:
+						return False
+				else:
+					return False
+			else:
+				return False
 			
 	def increaseNeed( self, needName, needValue ):
 		try:
@@ -112,16 +146,32 @@ class lv_character:
 			for object in self.world.objects:										# Search for the object to interact with.
 				if( object.id == self.activityInteractive ):						# Object found in the wolrd's object list.
 					objectFound = True
-					if( self.isInRange( object ) ):									# Checks if the object is in range of the character.
+					
+					if( self.activity == 'sleep' ):
+						radiusType = 'On'
+					elif( self.activity == 'eatSnack' ):
+						radiusType = 'NextTo'
+					elif( self.activity == 'cook' ):
+						radiusType = 'NextTo'
+					elif( self.activity == 'drink' ):
+						radiusType = 'NextTo'
+					elif( self.activity == 'shower' ):
+						radiusType = 'On'
+					else:
+						radiusType = 'Near'
+						
+					if( self.isInRange( object, radiusType ) ):							# Checks if the object is in range of the character.
 						print 'Object found to interact with and is in range. Object id is %i/%i.' % ( self.activityInteractive, object.id )
 						print 'Character interacts with the object of type %s.' % ( object.type )
 						exec 'object.%s( self )' % ( self.activity )				# Calls the methode of an world object which
 																					# triggers a callback of a characters methode to
 																					# modify a character attribute.
 						self.activityTimer -= 1
+				
 					else:
 						print 'Object found to interact with but is not in range. Object id is %i/%i.' % ( self.activityInteractive, object.id )
-						self.move( object.pos[0], object.pos[1], object.pos[2] )
+						self.goTo( object.pos[0], object.pos[1], object.pos[2] )
+						self.move()
 			if( objectFound == False ):												# Object not found in the world's object list.
 				print 'Object not found to interact. Object id is %s/%i.' % ( self.activityInteractive, object.id )
 				self.activity = None
@@ -156,6 +206,9 @@ class lv_character:
 								self.activity = 'sleep'
 								self.activityTimer = 28800							# 8 game hours
 								self.activityInteractive = object.id
+							if( self.isInRange( object, 'On' ) == False ):
+								self.goTo( object.pos[0], object.pos[1], object.pos[2] )
+								self.move()
 				else:																# The lowest need is not below the minimal limit.
 					self.activity = 'beHappy'										# Reset the activity to a standard beHappy activity.
 					self.activityTimer = 1											# Reset the timer to 1.
@@ -167,12 +220,18 @@ class lv_character:
 							if( lowestNeedValue > 833.333333333 ):					# The food need is not below the critcal limit.
 								self.activity = 'eatSnack'
 								self.activityTimer = 300							# 5 game minutes.
-								self.activityInteractive = object.id				
+								self.activityInteractive = object.id
+							if( self.isInRange( object, 'NextTo' ) == False ):
+								self.goTo( object.pos[0], object.pos[1], object.pos[2] )
+								self.move()
 						elif( object.type == 'cooker' ):							# Object of type cooker found in the wolrd's object list.
 							if( lowestNeedValue > 0 ):								# The food need is below the critcal limit.
 								self.activity = 'cook'
 								self.activityTimer = 900							# 15 game minutes.
 								self.activityInteractive = object.id
+							if( self.isInRange( object, 'NextTo' ) == False ):
+								self.goTo( object.pos[0], object.pos[1], object.pos[2] )
+								self.move()
 				else:																# The lowest need is not below the minimal limit.
 					self.activity = 'beHappy'										# Reset the activity to a standard beHappy activity.
 					self.activityTimer = 1											# Reset the timer to 1.
@@ -184,6 +243,9 @@ class lv_character:
 							self.activity = 'drink'
 							self.activityTimer = 60									# 1 game minute.
 							self.activityInteractive = object.id
+							if( self.isInRange( object, 'NextTo' ) == False ):
+								self.goTo( object.pos[0], object.pos[1], object.pos[2] )
+								self.move()
 				else:																# The lowest need is not below the minimal limit.
 					self.activity = 'beHappy'										# Reset the activity to a standard beHappy activity.
 					self.activityTimer = 1											# Reset the timer to 1.
@@ -195,6 +257,9 @@ class lv_character:
 							self.activity = 'takeAShower'
 							self.activityTimer = 1800								# 30 game minutes.
 							self.activityInteractive = object.id
+							if( self.isInRange( object, 'On' ) == False ):
+								self.goTo( object.pos[0], object.pos[1], object.pos[2] )
+								self.move()
 				else:																# The lowest need is not below the minimal limit.
 					self.activity = 'beHappy'										# Reset the activity to a standard beHappy activity.
 					self.activityTimer = 1											# Reset the timer to 1.
