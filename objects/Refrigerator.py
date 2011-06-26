@@ -22,14 +22,16 @@ class Refrigerator( object ):
         self.id = id
         self.type = 'Refrigerator'
         self.pos = [ x, y, z ]
+        self.radii = { 'drink': 1,
+                       'eatSnack': 1 }
         self.isInUse = False
 
     def drink( self, user ):
         # The user drinks somthing.
-        print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
+        # print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
         user.increaseNeed( 'water', 1.388888889 )
 
     def eatSnack( self, user ):
         # The user eats a snack.
-        print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
+        # print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
         user.increaseNeed( 'food', 0.555555556 )

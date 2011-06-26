@@ -22,9 +22,10 @@ class TvSet( Object ):
         self.id = id
         self.type = 'TvSet'
         self.pos = [ x, y, z ]
+        self.radii = { 'watch': 2 }
         self.isInUse = False
 
     def watch( self, user ):
         # The user watches TV.
-        print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
-        user.increaseNeed( 'hygiene', 0.555555556 )
+        # print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
+        user.increaseNeed( 'fun', 0.555555556 )

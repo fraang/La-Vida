@@ -22,9 +22,10 @@ class Shower( Object ):
         self.id = id
         self.type = 'Shower'
         self.pos = [ x, y, z ]
+        self.radii = { 'shower': 0 }
         self.isInUse = False
 
     def shower( self, user ):
         # The user takes a  shower.
-        print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
+        # print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
         user.increaseNeed( 'hygiene', 0.555555556 )

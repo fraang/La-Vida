@@ -24,30 +24,23 @@ class Character:
         self.id = id                    # Unique integer number to identify a character.
         self.pos = [ 0, 0, 0 ]          # A characters current position.
         self.destination = [ 0, 0, 0 ]  # A characters destination for movement.
+        self.radii = { 'talk': 1 }
 
         if( gender.lower() == 'random' ):                   # A characters gender.
             self.gender = choice( ( 'male', 'female' ) )    #
         else:                                               #
             self.gender = gender                            #
-
-        self.activity = None            # A characters activity.
-        self.activityTimer = 0          # How much game seconds are left for an activity.
-        self.activityInteractive = None # The character or object to interact with.
-
-        # to-do: use the new brain class for ai
-        self.activityRadiusOn = 0
-        self.activityRadiusNextTo = 1
-        self.activityRadiusNear = 2      
-        
+            
         # The brain which provides attributes and methodes for the ai of a character.
         self.brain = Brain( self )                                                                                                                                                          # near the character or object.
 
-        self.needs = { 'sleep':        500,     # The chracters needs.
-                       'food':         500,     #
-                       'water':        500,     #
-                       'hygiene':      500,     #
-                       'fun':          1000,    #
-                       'social':       1000 }   #
+        self.needs = { 'sleep':     500,    # The chracters needs.
+                       'food':      500,    #
+                       'water':     500,    #
+                       'urination': 500,    #
+                       'hygiene':   500,    #
+                       'fun':       500,    #
+                       'social':    500 }   #
 
     def teleportTo( self, x, y, z ):
         print 'DEBUG: Character %i teleports to X: %i Y: %i Z: %i.' % ( self.id, x, y, z )
@@ -79,42 +72,7 @@ class Character:
                 self.pos[ 2 ] += 1
             elif( self.pos[ 2 ] > self.destination[ 2 ] ):
                 self.pos[ 2 ] -= 1
-
-    def isInRange( self, characterOrObject, type ):
-        if( type == 'On' ):
-            if( characterOrObject.pos[ 0 ] >= self.pos[ 0 ] - self.activityRadiusOn and characterOrObject.pos[0] <= self.pos[ 0 ] + self.activityRadiusOn ):
-                if( characterOrObject.pos[ 1 ] >= self.pos[ 1 ] - self.activityRadiusOn and characterOrObject.pos[ 1 ] <= self.pos[ 1 ] + self.activityRadiusOn ):
-                    if( characterOrObject.pos[ 2 ] >= self.pos[ 2 ] - self.activityRadiusOn and characterOrObject.pos[ 2 ] <= self.pos[ 2 ] + self.activityRadiusOn ):
-                        return True
-                    else:
-                        return False
-                else:
-                    return False
-            else:
-                return False
-        if( type == 'NextTo' ):
-            if( characterOrObject.pos[ 0 ] >= self.pos[ 0 ] - self.activityRadiusNextTo and characterOrObject.pos[0] <= self.pos[ 0 ] + self.activityRadiusNextTo ):
-                if( characterOrObject.pos[ 1 ] >= self.pos[ 1 ] - self.activityRadiusNextTo and characterOrObject.pos[ 1 ] <= self.pos[ 1 ] + self.activityRadiusNextTo ):
-                    if( characterOrObject.pos[ 2 ] >= self.pos[ 2 ] - self.activityRadiusNextTo and characterOrObject.pos[ 2 ] <= self.pos[ 2 ] + self.activityRadiusNextTo ):
-                        return True
-                    else:
-                        return False
-                else:
-                    return False
-            else:
-                return False
-        if( type == 'Near' ):
-            if( characterOrObject.pos[ 0 ] >= self.pos[ 0 ] - self.activityRadiusNear and characterOrObject.pos[0] <= self.pos[ 0 ] + self.activityRadiusNear ):
-                if( characterOrObject.pos[ 1 ] >= self.pos[ 1 ] - self.activityRadiusNear and characterOrObject.pos[ 1 ] <= self.pos[ 1 ] + self.activityRadiusNear ):
-                    if( characterOrObject.pos[ 2 ] >= self.pos[ 2 ] - self.activityRadiusNear and characterOrObject.pos[ 2 ] <= self.pos[ 2 ] + self.activityRadiusNear ):
-                        return True
-                    else:
-                        return False
-                else:
-                    return False
-            else:
-                return False
-
+                
     def increaseNeed( self, needName, needValue ):
         try:
             if( self.needs[needName] < 1000 ):
@@ -126,166 +84,42 @@ class Character:
 
     def decreaseNeeds( self ):
         try:
-            if( self.activity != 'rest' and self.activity != 'sleep' ):
+            if( self.brain.activity != 'rest' and self.brain.activity != 'sleep' ):
                 self.needs['sleep'] -= 0.011574074
-            if( self.activity != 'cook' ):
+            if( self.brain.activity != 'cook' ):
                 self.needs['food'] -= 0.003858025
-            if( self.activity != 'drink' ):
+            if( self.brain.activity != 'drink' ):
                 self.needs['water'] -= 0.011574074
-            if( self.activity != 'shower' ):
+            if( self.brain.activity != 'use' ):
+                self.needs['urination'] -= 0.069444444
+            if( self.brain.activity != 'shower' ):
                 self.needs['hygiene'] -= 0.005787037
-            if( self.activity != 'watch' ):
-                self.needs['fun'] -= 1
-            # if( self.activity != 'chat' ):
-            #       self.needs['social'] -= 1
+            if( self.brain.activity != 'watch' ):
+                self.needs['fun'] -= 0.034722222
+            if( self.brain.activity != 'chat' ):
+                self.needs['social'] -= 0.011574074
         except:
             pass
 
     def processActivity( self ):
         # Process the activity of a character.
-        
-        if( self.activityTimer > 0 ):                               # Character has active activity.
-            print 'Character is doing activity. Timer is not zero.'
-            objectFound = False
-            for object in self.world.objects:                       # Search for the object to interact with.
-                if( object.id == self.activityInteractive ):        # Object found in the wolrd's object list.
-                    objectFound = True
-                    
-                    if( self.activity == 'rest' ):
-                        radiusType = 'On'
-                    elif( self.activity == 'sleep' ):
-                        radiusType = 'On'
-                    elif( self.activity == 'eatSnack' ):
-                        radiusType = 'NextTo'
-                    elif( self.activity == 'cook' ):
-                        radiusType = 'NextTo'
-                    elif( self.activity == 'drink' ):
-                        radiusType = 'NextTo'
-                    elif( self.activity == 'shower' ):
-                        radiusType = 'On'
-                    elif( self.activity == 'watch' ):
-                        radiusType = 'Near'
-                    else:
-                        radiusType = 'Near'
-
-                    if( self.isInRange( object, radiusType ) ):                                                     # Checks if the object is in range of the character.
-                        print 'Object found to interact with and is in range (%s). Object id is %i/%i.' % ( radiusType, self.activityInteractive, object.id )
-                        print 'Character interacts with the object of type %s.' % ( object.type )
-                        exec 'object.%s( self )' % ( self.activity )                            # Calls the methode of an world object which                                                                                                                                        # modify a character attribute.
-                        self.activityTimer -= 1
-
-                    else:
-                        print 'Object found to interact with but is not in range (%s). Object id is %i/%i.' % ( radiusType, self.activityInteractive, object.id )
-                        self.goTo( object.pos[0], object.pos[1], object.pos[2] )
-                        self.move()
-            if( objectFound == False ):                                                                                             # Object not found in the world's object list.
-                print 'Object not found to interact. Object id is %s/%i.' % ( self.activityInteractive, object.id )
-                self.activity = None
-                self.activityTimer = 0
-                self.activityInteractive = None
-        else:                                                                                                                                           # Character is free for a new activity.
-            print 'Character is thinking about the next activity. Timer is zero.'
-            # Getting the lowest need
-            lowestNeedName  = ''
-            lowestNeedValue = 1000
-            for needName in self.needs.keys():
-                if( self.needs.get( needName ) < lowestNeedValue ):
-                    lowestNeedName  = needName
-                    lowestNeedValue = self.needs.get( needName )
-
-            print '\033[32mInfo\033[0m Lowest need: %s (%i)' % ( lowestNeedName, lowestNeedValue )
-
-            # Searching for an character or object to raise the need
-            # if( lowestNeedName == 'fun' or lowestNeedName == 'social' ):
-            #       for character in self.world.characters:
-            #               self.needs[lowestNeedName] = 1000
-            #               # if( character. ):
-            if( lowestNeedName == 'sleep' ):
-                if( lowestNeedValue < 833.333333333 ):                                                          # The sleep need is not below the minimal limit.
-                    for object in self.world.objects:                                                               # Search for the object to interact with.
-                        if( object.type == 'Bed' ):                                                                     # Object of type bed found in the wolrd's object list.
-                            if( lowestNeedValue > 208.333333333 ):                                  # The sleep need is not below the critcal limit.
-                                self.activity = 'rest'
-                                self.activityTimer = 900                                                        # 15 game minutes
-                                self.activityInteractive = object.id
-                            else:                                                                                                   # The sleep need is below the critcal limit.
-                                self.activity = 'sleep'
-                                self.activityTimer = 28800                                                      # 8 game hours
-                                self.activityInteractive = object.id
-                            if( self.isInRange( object, 'On' ) == False ):
-                                self.goTo( object.pos[0], object.pos[1], object.pos[2] )
-                                self.move()
-                else:                                                                                                                           # The lowest need is not below the minimal limit.
-                    self.activity = 'beHappy'                                                                               # Reset the activity to a standard beHappy activity.
-                    self.activityTimer = 1                                                                                  # Reset the timer to 1.
-                    self.activityInteractive = None                                                                 # Reset the interactive to None.
-            elif( lowestNeedName == 'food' ):
-                if( lowestNeedValue < 833.333333333 ):                                                          # The food need is not below the minimal limit.
-                    for object in self.world.objects:                                                               # Search for the object to interact with.
-                        if( object.type == 'Refrigerator' ):                                            # Object of type refrigerator found in the wolrd's object list.
-                            if( lowestNeedValue > 833.333333333 ):                                  # The food need is not below the critcal limit.
-                                self.activity = 'eatSnack'
-                                self.activityTimer = 300                                                        # 5 game minutes.
-                                self.activityInteractive = object.id
-                            if( self.isInRange( object, 'NextTo' ) == False ):
-                                self.goTo( object.pos[0], object.pos[1], object.pos[2] )
-                                self.move()
-                        elif( object.type == 'Cooker' ):                                                        # Object of type cooker found in the wolrd's object list.
-                            if( lowestNeedValue > 0 ):                                                              # The food need is below the critcal limit.
-                                self.activity = 'cook'
-                                self.activityTimer = 900                                                        # 15 game minutes.
-                                self.activityInteractive = object.id
-                            if( self.isInRange( object, 'NextTo' ) == False ):
-                                self.goTo( object.pos[0], object.pos[1], object.pos[2] )
-                                self.move()
-                else:                                                                                                                           # The lowest need is not below the minimal limit.
-                    self.activity = 'beHappy'                                                                               # Reset the activity to a standard beHappy activity.
-                    self.activityTimer = 1                                                                                  # Reset the timer to 1.
-                    self.activityInteractive = None                                                                 # Reset the interactive to None.
-            elif( lowestNeedName == 'water' ):
-                if( lowestNeedValue < 833.333333333 ):                                                          # The water need is not below the minimal limit.
-                    for object in self.world.objects:
-                        if( object.type == 'Refrigerator' ):
-                            self.activity = 'drink'
-                            self.activityTimer = 60                                                                 # 1 game minute.
-                            self.activityInteractive = object.id
-                            if( self.isInRange( object, 'NextTo' ) == False ):
-                                self.goTo( object.pos[0], object.pos[1], object.pos[2] )
-                                self.move()
-                else:                                                                                                                           # The lowest need is not below the minimal limit.
-                    self.activity = 'beHappy'                                                                               # Reset the activity to a standard beHappy activity.
-                    self.activityTimer = 1                                                                                  # Reset the timer to 1.
-                    self.activityInteractive = None                                                                 # Reset the interactive to None.
-            elif( lowestNeedName == 'hygiene' ):
-                if( lowestNeedValue < 833.333333333 ):                                                          # The hygiene need is not below the minimal limit.
-                    for object in self.world.objects:
-                        if( object.type == 'Shower' ):
-                            self.activity = 'shower'
-                            self.activityTimer = 1800                                                               # 30 game minutes.
-                            self.activityInteractive = object.id
-                            if( self.isInRange( object, 'On' ) == False ):
-                                self.goTo( object.pos[0], object.pos[1], object.pos[2] )
-                                self.move()
-                else:                                                                                                                           # The lowest need is not below the minimal limit.
-                    self.activity = 'beHappy'                                                                               # Reset the activity to a standard beHappy activity.
-                    self.activityTimer = 1                                                                                  # Reset the timer to 1.
-                    self.activityInteractive = None                                                                 # Reset the interactive to None.
-            elif( lowestNeedName == 'fun' ):
-                if( lowestNeedValue < 833.333333333 ):
-                    for object in self.world.objects:
-                        if( object.type == 'TvSet' ):
-                            self.activity = 'watch'
-                            self.activityTimer = 1800   # 30 game minutes.
-                            self.activityInteractive = object.id
-                            if( self.isInRange( object, 'On' ) == False ):
-                                # If the character is not in range set the new destination and move to it.
-                                self.goTo( object.pos[0], object.pos[1], object.pos[2] )
-                                self.move()
-                else:                                   # The lowest need is not below the minimal limit.
-                    self.activity = 'beHappy'           # Reset the activity to a standard beHappy activity.
-                    self.activityTimer = 1              # Reset the timer to 1.
-                    self.activityInteractive = None     # Reset the interactive to None.
-            else:                                       # There is no lowest need. Should never happen.
-                self.activity = 'beHappy'               # Reset the activity to a standard beHappy activity.
-                self.activityTimer = 1                  # Reset the timer to 1.
-                self.activityInteractive = None         # Reset the interactive to None.
+        if( self.brain.activityTimer > 0 ):
+            try:
+                if( self.brain.isInRange( self.brain.activityInteractive, self.brain.activity ) ):
+                    # print '\033[32mInfo\033[0m Character %i: Character or object with id %i is in range.' % ( self.id, self.brain.activityInteractive.id )
+                    # print '\033[32mInfo\033[0m Character %i interacts with the object of type %s.' % ( self.id, self.brain.activityInteractive.type )
+                    exec 'self.brain.activityInteractive.%s( self )' % ( self.brain.activity )                                                                                                                                        # modify a character attribute.
+                    self.brain.activityTimer -= 1
+                else:
+                    # print '\033[32mInfo\033[0m Character %i: Character or object with id %i is in range.' % ( self.id, self.brain.activityInteractive.id )
+                    self.goTo( self.brain.activityInteractive.pos[0], self.brain.activityInteractive.pos[1], self.brain.activityInteractive.pos[2] )
+                    self.move()
+            except:
+                print '\033[31mError\033[0m Character %i: Interactive does not exist.' % ( self.id )
+        else:
+            self.brain.getNextActivity()
+            
+    def talk( self, opposite):
+        # The opposite talks to this character.
+        # print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
+        opposite.increaseNeed( 'social', 0.277777778 )

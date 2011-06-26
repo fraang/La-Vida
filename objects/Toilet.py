@@ -14,26 +14,18 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # General Public License for more details.
 
-from twisted.internet import reactor
-
 import gameEngine
-from gameEngine.ServerFactory import ServerFactory
-from gameEngine.World import World
+from gameEngine.Object import Object
 
-class Server:
-    def __init__( self ):
-        # Initializing the simulation
-        self.world = World( 2 )
-    def run( self ):
-        print '\033[32mInfo\033[0m Starting world thread...'
-        reactor.callInThread( self.world.run )
+class Toilet( Object ):
+    def __init__( self, id, x, y, z ):
+        self.id = id
+        self.type = 'Toilet'
+        self.pos = [ x, y, z ]
+        self.radii = { 'use': 0 }
+        self.isInUse = False
 
-        print '\033[32mInfo\033[0m Starting listening socket...'
-        reactor.listenTCP( 65000, ServerFactory() )
-
-        print '\033[32mInfo\033[0m Starting reactor...'
-        reactor.run()
-
-if( __name__ == '__main__' ):
-    Server = Server()
-    Server.run()
+    def use( self, user ):
+        # The user uses the toilet.
+        # print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
+        user.increaseNeed( 'urination', 2.222222222 )

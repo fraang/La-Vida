@@ -25,12 +25,12 @@ import objects
 from objects.Bed import Bed
 from objects.Cooker import Cooker
 from objects.Refrigerator import Refrigerator
+from objects.Toilet import Toilet
 from objects.Shower import Shower
+from objects.TvSet import TvSet
 
 class World:
     def __init__( self, amountOfCharacters ):
-        
-        
         # Basic infrastructure
         self.configParser = ConfigParser()
 
@@ -55,7 +55,7 @@ class World:
             self.ticksPerSecond     = self.configParser.get( 'time', 'ticksPerSecond' )     # Ticks per second
             self.gameSecondsPerTick = self.configParser.get( 'time', 'gameSecondsPerTick' ) # The amount of game seconds passing each tick
         else:
-            self.ticksPerSecond     = 1
+            self.ticksPerSecond     = 1.50
             self.gameSecondsPerTick = 1
 
         # Physics data
@@ -75,7 +75,9 @@ class World:
         self.objects.insert( 0, Bed( 0, -7, -7, 0 ) )
         self.objects.insert( 1, Cooker( 1, 1, 1, 0 ) )
         self.objects.insert( 2, Refrigerator( 2, 5, 5, 0 ) )
-        self.objects.insert( 3, Shower( 3, 7, 3, 0 ) )
+        self.objects.insert( 3, Toilet( 3, 10, 10, 0 ) )
+        self.objects.insert( 4, Shower( 4, 7, 3, 0 ) )
+        self.objects.insert( 5, TvSet( 5, 10, -2, 0 ) )
 
     def processTime( self ):
         # Process the game time.
@@ -134,12 +136,16 @@ class World:
             # self.processGravity()
             print '\033[32mInfo\033[0m World\tGame date: %i-%i-%i\tGame time: %i:%i:%i' % ( self.gameYear, self.gameMonth, self.gameDay, self.gameHour, self.gameMinute, self.gameSecond )
             for character in self.characters:
-                print '\033[32mInfo\033[0m Character %i, %s' % ( character.id, character.gender )
-                print '\033[32mInfo\033[0m Pos: %i %i %i\tDestination: %i %i %i' % ( character.pos[0], character.pos[1], character.pos[2], character.destination[0], character.destination[1], character.destination[2] )
-                print '\033[32mInfo\033[0m Sleep: %i\t\tFood: %i\tWater: %i' % ( character.needs['sleep'], character.needs['food'], character.needs['water'] )
-                print '\033[32mInfo\033[0m Hygiene: %i\tFun: %i\tSocial: %i' % ( character.needs['hygiene'], character.needs['fun'], character.needs['social'] )
-                print '\033[32mInfo\033[0m Activity: %s (%i game seconds left)' % ( character.activity, character.activityTimer )
                 character.decreaseNeeds()
                 character.processActivity()
+                print '\033[32mInfo\033[0m Character %i, %s:' % ( character.id, character.gender )
+                print '\033[32mInfo\033[0m     Pos: %i %i %i\tDestination: %i %i %i' % ( character.pos[ 0 ], character.pos[ 1 ], character.pos[ 2 ], character.destination[ 0 ], character.destination[ 1 ], character.destination[ 2 ] )
+                print '\033[32mInfo\033[0m     Sleep: %i\tFood: %i\tWater: %i\tUrination: %i' % ( character.needs[ 'sleep' ], character.needs[ 'food' ], character.needs[ 'water' ], character.needs[ 'urination' ] )
+                print '\033[32mInfo\033[0m     Hygiene: %i\tFun: %i\tSocial: %i' % ( character.needs[ 'hygiene' ], character.needs[ 'fun' ], character.needs[ 'social' ] )
+                print '\033[32mInfo\033[0m     Activity: %s (%i game seconds left)' % ( character.brain.activity, character.brain.activityTimer )
+                try:
+                    print '\033[32mInfo\033[0m     Interactive: %i\tType: %s' % ( character.brain.activityInteractive.id, character.brain.activityInteractiveTypes[ character.brain.activity ] )
+                except:
+                    print '\033[31mError\033[0m Character %i: Interactive does not exist.' % ( character.id )
             sleep( 1 / self.ticksPerSecond )
 

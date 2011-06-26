@@ -22,9 +22,10 @@ class Cooker( Object ):
         self.id = id
         self.type = 'Cooker'
         self.pos = [ x, y, z ]
+        self.radii = { 'cook': 1 }
         self.isInUse = False
 
     def cook( self, user ):
         # The user cooks on the cooker and eats.
-        print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
+        # print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
         user.increaseNeed( 'food', 0.37037037 )

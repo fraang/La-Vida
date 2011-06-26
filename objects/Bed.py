@@ -22,14 +22,16 @@ class Bed( Object ):
         self.id = id
         self.type = 'Bed'
         self.pos = [ x, y, z ]
+        self.radii = { 'rest': 0,
+                       'sleep': 0 }
         self.isInUse = False
 
     def rest( self, user ):
         # The user rests on the bed.
-        print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
+        # print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
         user.increaseNeed( 'sleep', 0.008680555 )
 
     def sleep( self, user ):
         # The user sleeps on the bed.
-        print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
+        # print 'DEBUG: %s.%s is called.' % ( __name__, dir( self ) )
         user.increaseNeed( 'sleep', 0.034722222 )
