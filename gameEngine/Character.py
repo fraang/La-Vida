@@ -16,35 +16,38 @@
 
 from random import choice
 
+from Brain import Brain
+
 class Character:
     def __init__( self, id, world, gender ):
-        self.id = id                                                                                                                            # Unique integer number to identify a character.
-        self.world = world                                                                                                                      # The world a character belongs to.
-        self.pos = [ 0, 0, 0 ]                                                                                                          # A characters current position.
-        self.destination = [ 0, 0, 0 ]                                                                                          # A characters destination for movement.
+        self.world = world              # The world a character belongs to.
+        self.id = id                    # Unique integer number to identify a character.
+        self.pos = [ 0, 0, 0 ]          # A characters current position.
+        self.destination = [ 0, 0, 0 ]  # A characters destination for movement.
 
-        if( gender.lower() == 'random' ):                                                                                       # A characters gender.
-            self.gender = choice( ( 'male', 'female' ) )                                                    #
-        else:                                                                                                                                           #
-            self.gender = gender                                                                                                    #
+        if( gender.lower() == 'random' ):                   # A characters gender.
+            self.gender = choice( ( 'male', 'female' ) )    #
+        else:                                               #
+            self.gender = gender                            #
 
-        self.activity = None                                                                                                            # A characters activity.
-        self.activityTimer = 0                                                                                                          # How much game seconds are left for an activity.
-        self.activityInteractive = None                                                                                         # The character or object to interact with.
+        self.activity = None            # A characters activity.
+        self.activityTimer = 0          # How much game seconds are left for an activity.
+        self.activityInteractive = None # The character or object to interact with.
 
-        self.activityRadiusOn = 0                                                                                                       # The radius for activities which the character is
-                                                                                                                                                                # on a character or object.
-        self.activityRadiusNextTo = 1                                                                                           # The radius for activities which the character is
-                                                                                                                                                                # next to a character or object.
-        self.activityRadiusNear = 2                                                                                                     # The radius for activities which the character is
-                                                                                                                                                                # near the character or object.
+        # to-do: use the new brain class for ai
+        self.activityRadiusOn = 0
+        self.activityRadiusNextTo = 1
+        self.activityRadiusNear = 2      
+        
+        # The brain which provides attributes and methodes for the ai of a character.
+        self.brain = Brain( self )                                                                                                                                                          # near the character or object.
 
-        self.needs = { 'sleep':        500,                                                                                   # The chracters needs.
-                       'food':         500,                                                                                   #
-                       'water':        500,                                                                                   #
-                       'hygiene':      500,                                                                                   #
-                       'fun':          1000,                                                                                   #
-                       'social':       1000 }                                                                                  #
+        self.needs = { 'sleep':        500,     # The chracters needs.
+                       'food':         500,     #
+                       'water':        500,     #
+                       'hygiene':      500,     #
+                       'fun':          1000,    #
+                       'social':       1000 }   #
 
     def teleportTo( self, x, y, z ):
         print 'DEBUG: Character %i teleports to X: %i Y: %i Z: %i.' % ( self.id, x, y, z )
@@ -131,8 +134,8 @@ class Character:
                 self.needs['water'] -= 0.011574074
             if( self.activity != 'shower' ):
                 self.needs['hygiene'] -= 0.005787037
-            # if( self.activity != 'watchTV' ):
-            #       self.needs['fun'] -= 1
+            if( self.activity != 'watch' ):
+                self.needs['fun'] -= 1
             # if( self.activity != 'chat' ):
             #       self.needs['social'] -= 1
         except:
@@ -160,6 +163,8 @@ class Character:
                         radiusType = 'NextTo'
                     elif( self.activity == 'shower' ):
                         radiusType = 'On'
+                    elif( self.activity == 'watch' ):
+                        radiusType = 'Near'
                     else:
                         radiusType = 'Near'
 
@@ -265,7 +270,22 @@ class Character:
                     self.activity = 'beHappy'                                                                               # Reset the activity to a standard beHappy activity.
                     self.activityTimer = 1                                                                                  # Reset the timer to 1.
                     self.activityInteractive = None                                                                 # Reset the interactive to None.
-            else:
-                self.activity = 'beHappy'                                                                                       # Reset the activity to a standard beHappy activity.
-                self.activityTimer = 1                                                                                          # Reset the timer to 1.
-                self.activityInteractive = None                                                                         # Reset the interactive to None.
+            elif( lowestNeedName == 'fun' ):
+                if( lowestNeedValue < 833.333333333 ):
+                    for object in self.world.objects:
+                        if( object.type == 'TvSet' ):
+                            self.activity = 'watch'
+                            self.activityTimer = 1800   # 30 game minutes.
+                            self.activityInteractive = object.id
+                            if( self.isInRange( object, 'On' ) == False ):
+                                # If the character is not in range set the new destination and move to it.
+                                self.goTo( object.pos[0], object.pos[1], object.pos[2] )
+                                self.move()
+                else:                                   # The lowest need is not below the minimal limit.
+                    self.activity = 'beHappy'           # Reset the activity to a standard beHappy activity.
+                    self.activityTimer = 1              # Reset the timer to 1.
+                    self.activityInteractive = None     # Reset the interactive to None.
+            else:                                       # There is no lowest need. Should never happen.
+                self.activity = 'beHappy'               # Reset the activity to a standard beHappy activity.
+                self.activityTimer = 1                  # Reset the timer to 1.
+                self.activityInteractive = None         # Reset the interactive to None.
