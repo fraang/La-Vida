@@ -22,8 +22,8 @@ class Character:
     def __init__( self, id, world, gender ):
         self.world = world              # The world a character belongs to.
         self.id = id                    # Unique integer number to identify a character.
-        self.pos = [ 0, 0, 0 ]          # A characters current position.
-        self.destination = [ 0, 0, 0 ]  # A characters destination for movement.
+        self.pos = [ 1, 1, 0 ]          # A characters current position.
+        self.destination = [ 1, 1, 0 ]  # A characters destination for movement.
         self.radii = { 'talk': 1 }
 
         if( gender.lower() == 'random' ):                   # A characters gender.
@@ -43,31 +43,31 @@ class Character:
                        'social':    500 }   #
 
     def teleportTo( self, x, y, z ):
-        print 'DEBUG: Character %i teleports to X: %i Y: %i Z: %i.' % ( self.id, x, y, z )
+        # print 'DEBUG: Character %i teleports to X: %i Y: %i Z: %i.' % ( self.id, x, y, z )
         self.pos = [ x, y, z ]
 
     def goTo( self, x, y, z ):
-        print 'DEBUG: Character %i goes to X: Y: %i %i Z: %i.' % ( self.id, x, y, z )
+        # print 'DEBUG: Character %i goes to X: Y: %i %i Z: %i.' % ( self.id, x, y, z )
         self.destination = [ x, y, z ]
 
     def move( self ):
         # X axis
         if( self.pos[ 0 ] != self.destination[ 0 ] ):
-            print 'DEBUG: Character %i is on his/her way on the x axis.'
+            # print 'DEBUG: Character %i is on his/her way on the x axis.'
             if( self.pos[ 0 ] < self.destination[ 0 ] ):
                 self.pos[ 0 ] += 1
             elif( self.pos[ 0 ] > self.destination[ 0 ] ):
                 self.pos[ 0 ] -= 1
         # Y axis
         if( self.pos[ 1 ] != self.destination[ 1 ] ):
-            print 'DEBUG: Character %i is on his/her way on the y axis.'
+            # print 'DEBUG: Character %i is on his/her way on the y axis.'
             if( self.pos[ 1 ] < self.destination [ 1 ] ):
                 self.pos[ 1 ] += 1
             elif( self.pos[ 1 ] > self.destination[ 1 ] ):
                 self.pos[ 1 ] -= 1
         # Z axis
         if( self.pos[ 2 ] != self.destination[ 2 ] ):
-            print 'DEBUG: Character %i is on his/her way on the z axis.'
+            # print 'DEBUG: Character %i is on his/her way on the z axis.'
             if( self.pos[ 2 ] < self.destination [ 2 ] ):
                 self.pos[ 2 ] += 1
             elif( self.pos[ 2 ] > self.destination[ 2 ] ):
@@ -96,7 +96,7 @@ class Character:
                 self.needs['hygiene'] -= 0.005787037
             if( self.brain.activity != 'watch' ):
                 self.needs['fun'] -= 0.034722222
-            if( self.brain.activity != 'chat' ):
+            if( self.brain.activity != 'talk' ):
                 self.needs['social'] -= 0.011574074
         except:
             pass

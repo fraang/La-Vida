@@ -14,26 +14,52 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # General Public License for more details.
 
+import os
+from time import sleep
 from twisted.internet import reactor
 
 import gameEngine
 from gameEngine.ServerFactory import ServerFactory
+from gameEngine.InputHandler import InputHandler
 from gameEngine.World import World
+
+import asciiWidgets
+from asciiWidgets.AsciiUI import AsciiUI
 
 class Server:
     def __init__( self ):
-        # Initializing the simulation
-        self.world = World( 2 )
+        self.stop = False
+        self.threadPool = None
+        self.world = World( self, 2 )
+        self.inputHandler = InputHandler( self )
+        self.asciiUI = AsciiUI( self, self.world )
+    
+    def quitLoop( self ):
+        while( self.stop == False ):
+            sleep( 0.1 )
+        reactor.stop()
+        
     def run( self ):
+        self.threadPool = reactor.getThreadPool()
+        
         print '\033[32mInfo\033[0m Starting world thread...'
-        reactor.callInThread( self.world.run )
+        reactor.callInThread( self.world.run, self.threadPool )
+        
+        print '\033[32mInfo\033[0m Starting input handler thread...'
+        reactor.callInThread( self.inputHandler.run, self.threadPool )
+        
+        print '\033[32mInfo\033[0m Starting ASCII UI thread...'
+        reactor.callInThread( self.asciiUI.run, self.threadPool )
+
+        reactor.callLater( 1, self.quitLoop )
 
         print '\033[32mInfo\033[0m Starting listening socket...'
         reactor.listenTCP( 65000, ServerFactory() )
-
+        
         print '\033[32mInfo\033[0m Starting reactor...'
         reactor.run()
-
+        
 if( __name__ == '__main__' ):
     Server = Server()
     Server.run()
+    os.system( 'clear' )

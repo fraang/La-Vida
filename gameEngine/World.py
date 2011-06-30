@@ -17,6 +17,7 @@
 import os
 from time import sleep, time
 from ConfigParser import ConfigParser
+from twisted.internet import reactor
 
 import gameEngine
 from gameEngine.Character import Character
@@ -30,8 +31,9 @@ from objects.Shower import Shower
 from objects.TvSet import TvSet
 
 class World:
-    def __init__( self, amountOfCharacters ):
+    def __init__( self, server, amountOfCharacters ):
         # Basic infrastructure
+        self.server = server
         self.configParser = ConfigParser()
 
         # Reading the game engine cinfiguration
@@ -55,7 +57,7 @@ class World:
             self.ticksPerSecond     = self.configParser.get( 'time', 'ticksPerSecond' )     # Ticks per second
             self.gameSecondsPerTick = self.configParser.get( 'time', 'gameSecondsPerTick' ) # The amount of game seconds passing each tick
         else:
-            self.ticksPerSecond     = 1.50
+            self.ticksPerSecond     = 1
             self.gameSecondsPerTick = 1
 
         # Physics data
@@ -72,12 +74,23 @@ class World:
         for i in range(amountOfCharacters):
             self.characters.insert( 0, Character( i, self, 'random' ) )
 
-        self.objects.insert( 0, Bed( 0, -7, -7, 0 ) )
-        self.objects.insert( 1, Cooker( 1, 1, 1, 0 ) )
-        self.objects.insert( 2, Refrigerator( 2, 5, 5, 0 ) )
-        self.objects.insert( 3, Toilet( 3, 10, 10, 0 ) )
-        self.objects.insert( 4, Shower( 4, 7, 3, 0 ) )
-        self.objects.insert( 5, TvSet( 5, 10, -2, 0 ) )
+        self.typeMap.insert( 0, [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] )
+        self.typeMap.insert( 1, [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] )
+        self.typeMap.insert( 2, [ 0, 3, 3, 3, 3, 0, 0, 0, 0, 0 ] )
+        self.typeMap.insert( 3, [ 0, 3, 3, 3, 3, 0, 0, 0, 0, 0 ] )
+        self.typeMap.insert( 4, [ 0, 3, 3, 3, 3, 0, 0, 0, 0, 0 ] )
+        self.typeMap.insert( 5, [ 0, 2, 2, 2, 2, 4, 4, 0, 0, 0 ] )
+        self.typeMap.insert( 6, [ 0, 2, 2, 2, 2, 4, 4, 4, 0, 0 ] )
+        self.typeMap.insert( 7, [ 0, 2, 2, 2, 2, 4, 4, 4, 0, 0 ] )
+        self.typeMap.insert( 8, [ 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 ] )
+        self.typeMap.insert( 9, [ 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 ] )
+
+        self.objects.insert( 0, Bed( 0, 3, 2, 0 ) )
+        self.objects.insert( 1, Cooker( 1, 7, 2, 0 ) )
+        self.objects.insert( 2, Refrigerator( 2, 6, 2, 0 ) )
+        self.objects.insert( 3, Toilet( 3, 8, 8, 0 ) )
+        self.objects.insert( 4, Shower( 4, 7, 7, 0 ) )
+        self.objects.insert( 5, TvSet( 5, 6, 5, 0 ) )
 
     def processTime( self ):
         # Process the game time.
@@ -129,23 +142,22 @@ class World:
             else:
                 object.pos[2] = 0
 
-    def run( self ):
-        while( self.gameDay <= 7 ):
-            os.system('clear')
+    def run( self, treadPool ):
+        while( self.server.stop != True ):
+            # os.system('clear')
             self.processTime()
             # self.processGravity()
-            print '\033[32mInfo\033[0m World\tGame date: %i-%i-%i\tGame time: %i:%i:%i' % ( self.gameYear, self.gameMonth, self.gameDay, self.gameHour, self.gameMinute, self.gameSecond )
+            # print '\033[32mInfo\033[0m World\tGame date: %i-%i-%i\tGame time: %i:%i:%i' % ( self.gameYear, self.gameMonth, self.gameDay, self.gameHour, self.gameMinute, self.gameSecond )
             for character in self.characters:
                 character.decreaseNeeds()
                 character.processActivity()
-                print '\033[32mInfo\033[0m Character %i, %s:' % ( character.id, character.gender )
-                print '\033[32mInfo\033[0m     Pos: %i %i %i\tDestination: %i %i %i' % ( character.pos[ 0 ], character.pos[ 1 ], character.pos[ 2 ], character.destination[ 0 ], character.destination[ 1 ], character.destination[ 2 ] )
-                print '\033[32mInfo\033[0m     Sleep: %i\tFood: %i\tWater: %i\tUrination: %i' % ( character.needs[ 'sleep' ], character.needs[ 'food' ], character.needs[ 'water' ], character.needs[ 'urination' ] )
-                print '\033[32mInfo\033[0m     Hygiene: %i\tFun: %i\tSocial: %i' % ( character.needs[ 'hygiene' ], character.needs[ 'fun' ], character.needs[ 'social' ] )
-                print '\033[32mInfo\033[0m     Activity: %s (%i game seconds left)' % ( character.brain.activity, character.brain.activityTimer )
-                try:
-                    print '\033[32mInfo\033[0m     Interactive: %i\tType: %s' % ( character.brain.activityInteractive.id, character.brain.activityInteractiveTypes[ character.brain.activity ] )
-                except:
-                    print '\033[31mError\033[0m Character %i: Interactive does not exist.' % ( character.id )
+                # print '\033[32mInfo\033[0m Character %i, %s:' % ( character.id, character.gender )
+                # print '\033[32mInfo\033[0m     Pos: %i %i %i\tDestination: %i %i %i' % ( character.pos[ 0 ], character.pos[ 1 ], character.pos[ 2 ], character.destination[ 0 ], character.destination[ 1 ], character.destination[ 2 ] )
+                # print '\033[32mInfo\033[0m     Sleep: %i\tFood: %i\tWater: %i\tUrination: %i' % ( character.needs[ 'sleep' ], character.needs[ 'food' ], character.needs[ 'water' ], character.needs[ 'urination' ] )
+                # print '\033[32mInfo\033[0m     Hygiene: %i\tFun: %i\tSocial: %i' % ( character.needs[ 'hygiene' ], character.needs[ 'fun' ], character.needs[ 'social' ] )
+                # print '\033[32mInfo\033[0m     Activity: %s (%i game seconds left)' % ( character.brain.activity, character.brain.activityTimer )
+                # try:
+                    # print '\033[32mInfo\033[0m     Interactive: %i\tType: %s' % ( character.brain.activityInteractive.id, character.brain.activityInteractiveTypes[ character.brain.activity ] )
+                # except:
+                    # print '\033[31mError\033[0m Character %i: Interactive does not exist.' % ( character.id )
             sleep( 1 / self.ticksPerSecond )
-
