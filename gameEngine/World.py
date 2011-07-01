@@ -15,7 +15,7 @@
 # General Public License for more details.
 
 import os
-from time import sleep, time
+from time import sleep, clock, time
 from ConfigParser import ConfigParser
 from twisted.internet import reactor
 
@@ -57,7 +57,7 @@ class World:
             self.ticksPerSecond     = self.configParser.get( 'time', 'ticksPerSecond' )     # Ticks per second
             self.gameSecondsPerTick = self.configParser.get( 'time', 'gameSecondsPerTick' ) # The amount of game seconds passing each tick
         else:
-            self.ticksPerSecond     = 1
+            self.ticksPerSecond     = 16
             self.gameSecondsPerTick = 1
 
         # Physics data
@@ -144,6 +144,7 @@ class World:
 
     def run( self, treadPool ):
         while( self.server.stop != True ):
+            clockStart = clock()
             # os.system('clear')
             self.processTime()
             # self.processGravity()
@@ -160,4 +161,5 @@ class World:
                     # print '\033[32mInfo\033[0m     Interactive: %i\tType: %s' % ( character.brain.activityInteractive.id, character.brain.activityInteractiveTypes[ character.brain.activity ] )
                 # except:
                     # print '\033[31mError\033[0m Character %i: Interactive does not exist.' % ( character.id )
-            sleep( 1 / self.ticksPerSecond )
+            clockEnd = clock()
+            sleep( float( 1 ) / float( self.ticksPerSecond ) - ( float(clockEnd) - float(clockStart) ) )
